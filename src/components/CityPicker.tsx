@@ -70,21 +70,23 @@ export function CityPicker({
   }
 
   return (
-    <div className="panel onboard-card" style={{ boxShadow: "none" }}>
+    <div className="panel onboard-card">
       <div className="brand">Cerca</div>
       <h1>{title}</h1>
       <p className="lead">{lead}</p>
-      <button className="btn btn-primary grow" style={{ width: "100%" }} onClick={useLocation} disabled={locating} type="button">
+      <button className="btn btn-primary grow" onClick={useLocation} disabled={locating} type="button">
         <LocateFixed size={18} />
         {locating ? "Buscando tu zona…" : "Usar mi ubicación"}
       </button>
-      <div className="search-card" style={{ marginTop: 12, boxShadow: "none" }}>
+      <div className="search-card city-search">
         <Search size={16} />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar ciudad, barrio o pueblo"
+          placeholder="Buscar ciudad o barrio"
           aria-label="Buscar ciudad"
+          autoComplete="off"
+          enterKeyHint="search"
         />
       </div>
       {error ? <p className="error">{error}</p> : null}
@@ -97,8 +99,11 @@ export function CityPicker({
               key={`${hit.lat}-${hit.lng}`}
               onClick={() => onPick(placeToCity(hit))}
             >
-              <strong>{hit.name}</strong>
-              <span>{hit.displayName}</span>
+              <MapPin size={16} />
+              <span>
+                <strong>{hit.name}</strong>
+                <span>{hit.displayName}</span>
+              </span>
             </button>
           ))}
         </div>
@@ -107,8 +112,8 @@ export function CityPicker({
           <p className="hint">{searching ? "Buscando…" : "Sugerencias rápidas"}</p>
           <div className="quick-cities">
             {SUGGESTED.map((city) => (
-              <button key={city.name} type="button" className="chip is-on" onClick={() => onPick(city)}>
-                <MapPin size={12} />
+              <button key={city.name} type="button" className="city-suggest" onClick={() => onPick(city)}>
+                <MapPin size={14} />
                 {city.name}
               </button>
             ))}
