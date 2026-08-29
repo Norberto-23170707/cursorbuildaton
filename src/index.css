@@ -979,6 +979,10 @@ label.field {
 
   .screen {
     position: relative;
+    inset: auto;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
     grid-column: 2;
     grid-row: 1;
     z-index: 1;
@@ -986,9 +990,11 @@ label.field {
 
   .rail {
     position: relative;
+    inset: auto;
     grid-column: 1;
     grid-row: 1;
     pointer-events: auto;
+    width: 100%;
     height: 100%;
     min-height: 0;
     overflow: hidden;
@@ -1027,10 +1033,8 @@ label.field {
 
   .top-stack {
     position: static;
+    inset: auto;
     width: auto;
-    left: auto;
-    right: auto;
-    top: auto;
     padding: 16px 14px 10px;
     gap: 10px;
   }
