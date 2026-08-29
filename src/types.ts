@@ -22,6 +22,7 @@ export type Activity = {
   organizer: string;
   source: ActivitySource;
   cityKey: string;
+  attendees: number;
 };
 
 export type City = {
@@ -32,6 +33,13 @@ export type City = {
   country: string;
 };
 
+export type User = {
+  name: string;
+  email: string;
+};
+
 export type Screen = "map" | "agenda";
 
-export type WhenFilter = "hoy" | "semana" | "todas";
+export type WhenFilter = "hoy" | "semana" | "todas" | "dia";
+
+export type AuthIntent = "publish" | "join" | null;

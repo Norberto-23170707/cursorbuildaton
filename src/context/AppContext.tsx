@@ -6,10 +6,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Activity, CategoryId, City, Screen, WhenFilter } from "../types";
+import type { Activity, AuthIntent, CategoryId, City, Screen, User, WhenFilter } from "../types";
 import { cityKey } from "../lib/geo";
 import { generateSampleActivities } from "../lib/sampleEvents";
-import { inWhenRange, isUpcoming, matchesQuery, uid } from "../lib/format";
+import { baseAttendees, inWhenRange, isUpcoming, matchesQuery, toDateInputValue, uid } from "../lib/format";
 import { storage } from "../lib/storage";
 
 type DraftLocation = { lat: number; lng: number } | null;
@@ -25,8 +25,13 @@ type AppState = {
   draftLocation: DraftLocation;
   categories: CategoryId[];
   when: WhenFilter;
+  day: string;
   query: string;
   locating: boolean;
+  user: User | null;
+  joinedIds: string[];
+  authOpen: boolean;
+  authIntent: AuthIntent;
 };
 
 type NewActivityInput = {
@@ -58,11 +63,27 @@ type AppContextValue = AppState & {
   setCategories: (ids: CategoryId[]) => void;
   toggleCategory: (id: CategoryId) => void;
   setWhen: (when: WhenFilter) => void;
+  setDay: (day: string) => void;
   setQuery: (query: string) => void;
   setLocating: (value: boolean) => void;
+  register: (user: User) => void;
+  logout: () => void;
+  closeAuth: () => void;
+  openAuth: () => void;
+  joinActivity: (id: string) => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
+
+function withAttendees(activities: Activity[]): Activity[] {
+  return activities.map((activity) => ({
+    ...activity,
+    attendees:
+      typeof activity.attendees === "number"
+        ? activity.attendees
+        : baseAttendees(activity.id, activity.title),
+  }));
+}
 
 function seedForCity(city: City, existing: Activity[]): Activity[] {
   const key = cityKey(city);
@@ -71,7 +92,7 @@ function seedForCity(city: City, existing: Activity[]): Activity[] {
   const seeds = alreadySeeded
     ? existing.filter((activity) => activity.source === "seed" && activity.cityKey === key)
     : generateSampleActivities(city.name, key, city.lat, city.lng);
-  return [...userKept, ...seeds];
+  return withAttendees([...userKept, ...seeds]);
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -80,7 +101,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activities, setActivities] = useState<Activity[]>(() => {
     const savedCity = storage.getCity();
     const saved = storage.getActivities();
-    if (!savedCity) return saved;
+    if (!savedCity) return withAttendees(saved);
     const next = seedForCity(savedCity, saved);
     storage.setActivities(next);
     return next;
@@ -91,13 +112,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [adding, setAdding] = useState(false);
   const [draftLocation, setDraftLocation] = useState<DraftLocation>(null);
   const [categories, setCategories] = useState<CategoryId[]>([]);
-  const [when, setWhen] = useState<WhenFilter>("semana");
+  const [when, setWhenState] = useState<WhenFilter>("semana");
+  const [day, setDayState] = useState(toDateInputValue);
   const [query, setQuery] = useState("");
   const [locating, setLocating] = useState(false);
+  const [user, setUser] = useState<User | null>(() => storage.getUser());
+  const [joinedIds, setJoinedIds] = useState<string[]>(() => storage.getJoined());
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authIntent, setAuthIntent] = useState<AuthIntent>(null);
 
   const persistActivities = useCallback((next: Activity[]) => {
-    setActivities(next);
-    storage.setActivities(next);
+    const normalized = withAttendees(next);
+    setActivities(normalized);
+    storage.setActivities(normalized);
+  }, []);
+
+  const persistJoined = useCallback((next: string[]) => {
+    setJoinedIds(next);
+    storage.setJoined(next);
   }, []);
 
   const applyCity = useCallback(
@@ -139,12 +171,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSelectedId(null);
   }, []);
 
-  const startAdd = useCallback(() => {
+  const beginAdd = useCallback(() => {
     setAdding(true);
     setSelectedId(null);
     setDraftLocation(null);
     setScreen("map");
   }, []);
+
+  const startAdd = useCallback(() => {
+    if (!storage.getUser()) {
+      setSelectedId(null);
+      setAuthIntent("publish");
+      setAuthOpen(true);
+      return;
+    }
+    beginAdd();
+  }, [beginAdd]);
 
   const cancelAdd = useCallback(() => {
     setAdding(false);
@@ -154,19 +196,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addActivity = useCallback(
     (input: NewActivityInput) => {
       if (!city) throw new Error("Elige una ciudad primero");
+      const currentUser = storage.getUser();
       const activity: Activity = {
         id: uid("user"),
         ...input,
+        organizer: input.organizer || currentUser?.name || "Vecindario",
         source: "user",
         cityKey: cityKey(city),
+        attendees: 1,
       };
       persistActivities([activity, ...storage.getActivities().filter((item) => item.id !== activity.id)]);
+      persistJoined([activity.id, ...storage.getJoined().filter((id) => id !== activity.id)]);
       setAdding(false);
       setDraftLocation(null);
       setSelectedId(activity.id);
       return activity;
     },
-    [city, persistActivities],
+    [city, persistActivities, persistJoined],
   );
 
   const removeActivity = useCallback(
@@ -176,8 +222,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const nextFav = storage.getFavorites().filter((fav) => fav !== id);
       setFavorites(nextFav);
       storage.setFavorites(nextFav);
+      persistJoined(storage.getJoined().filter((item) => item !== id));
     },
-    [persistActivities],
+    [persistActivities, persistJoined],
   );
 
   const toggleFavorite = useCallback((id: string) => {
@@ -192,16 +239,83 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCategories((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
   }, []);
 
+  const setWhen = useCallback((next: WhenFilter) => {
+    setWhenState(next);
+    if (next === "dia") setDayState((current) => current || toDateInputValue());
+  }, []);
+
+  const setDay = useCallback((next: string) => {
+    setDayState(next);
+    setWhenState("dia");
+  }, []);
+
+  const register = useCallback(
+    (nextUser: User) => {
+      setUser(nextUser);
+      storage.setUser(nextUser);
+      const intent = authIntent;
+      setAuthOpen(false);
+      setAuthIntent(null);
+      if (intent === "publish") beginAdd();
+      if (intent === "join" && selectedId) {
+        const already = storage.getJoined().includes(selectedId);
+        if (!already) {
+          persistActivities(
+            storage.getActivities().map((activity) =>
+              activity.id === selectedId ? { ...activity, attendees: activity.attendees + 1 } : activity,
+            ),
+          );
+          persistJoined([selectedId, ...storage.getJoined()]);
+        }
+      }
+    },
+    [authIntent, beginAdd, persistActivities, persistJoined, selectedId],
+  );
+
+  const logout = useCallback(() => {
+    setUser(null);
+    storage.setUser(null);
+  }, []);
+
+  const closeAuth = useCallback(() => {
+    setAuthOpen(false);
+    setAuthIntent(null);
+  }, []);
+
+  const openAuth = useCallback(() => {
+    setAuthIntent(null);
+    setAuthOpen(true);
+  }, []);
+
+  const joinActivity = useCallback(
+    (id: string) => {
+      if (!storage.getUser()) {
+        setSelectedId(id);
+        setAuthIntent("join");
+        setAuthOpen(true);
+        return;
+      }
+      if (storage.getJoined().includes(id)) return;
+      persistActivities(
+        storage.getActivities().map((activity) =>
+          activity.id === id ? { ...activity, attendees: activity.attendees + 1 } : activity,
+        ),
+      );
+      persistJoined([id, ...storage.getJoined()]);
+    },
+    [persistActivities, persistJoined],
+  );
+
   const visibleActivities = useMemo(() => {
     const key = city ? cityKey(city) : "";
     return activities
       .filter((activity) => activity.cityKey === key)
       .filter((activity) => isUpcoming(activity))
-      .filter((activity) => inWhenRange(activity.startsAt, when))
+      .filter((activity) => inWhenRange(activity.startsAt, when, day))
       .filter((activity) => (categories.length === 0 ? true : categories.includes(activity.category)))
       .filter((activity) => matchesQuery(activity, query))
       .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
-  }, [activities, city, when, categories, query]);
+  }, [activities, city, when, day, categories, query]);
 
   const selected = useMemo(
     () => activities.find((activity) => activity.id === selectedId) ?? null,
@@ -219,8 +333,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     draftLocation,
     categories,
     when,
+    day,
     query,
     locating,
+    user,
+    joinedIds,
+    authOpen,
+    authIntent,
     visibleActivities,
     selected,
     setScreen,
@@ -237,8 +356,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCategories,
     toggleCategory,
     setWhen,
+    setDay,
     setQuery,
     setLocating,
+    register,
+    logout,
+    closeAuth,
+    openAuth,
+    joinActivity,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

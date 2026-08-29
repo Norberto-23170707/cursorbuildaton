@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
+import { ActivityCards } from "./ActivityCards";
 import { ActivityMap } from "./ActivityMap";
-import { ActivitySheet } from "./ActivitySheet";
 import { AddActivityForm } from "./AddActivityForm";
 import { AgendaScreen } from "./AgendaScreen";
+import { AuthModal } from "./AuthModal";
 import { BottomDock } from "./BottomDock";
 import { CityPicker } from "./CityPicker";
 import { MapHud } from "./MapHud";
+import { MapIsland } from "./MapIsland";
 import { Onboarding } from "./Onboarding";
 
 export function Shell() {
@@ -22,9 +24,6 @@ export function Shell() {
     selectActivity,
     addActivity,
     cancelAdd,
-    removeActivity,
-    toggleFavorite,
-    favorites,
     changeCity,
   } = useApp();
   const [cityOpen, setCityOpen] = useState(false);
@@ -37,12 +36,14 @@ export function Shell() {
     );
   }
 
-  const sheetOpen = Boolean((selected && !adding) || (adding && draftLocation));
+  const formOpen = Boolean(adding && draftLocation);
   const placing = adding && !draftLocation;
+  const showFeed = screen === "map" && !formOpen && !placing;
   const rootClass = [
     "app-root",
-    sheetOpen ? "is-sheet" : "",
+    formOpen ? "is-sheet" : "",
     placing ? "is-placing" : "",
+    selected && !adding ? "is-island" : "",
     screen === "agenda" ? "is-agenda" : "",
   ]
     .filter(Boolean)
@@ -61,44 +62,48 @@ export function Shell() {
           onSelect={(id) => selectActivity(id)}
           onPickLocation={(lat, lng) => setDraftLocation({ lat, lng })}
         />
+        {placing ? (
+          <div className="map-toast">
+            <strong>Haz clic en el mapa</strong>
+            <span>Marca el punto en {city.name}.</span>
+            <button className="btn btn-ghost" type="button" onClick={cancelAdd}>
+              Salir
+            </button>
+          </div>
+        ) : null}
+        {selected && !adding ? <MapIsland /> : null}
       </div>
 
-      <div className="hud">
-        {screen === "map" && !sheetOpen ? <MapHud onChangeCity={() => setCityOpen(true)} /> : null}
+      <aside className="rail">
+        {screen !== "agenda" ? <MapHud onChangeCity={() => setCityOpen(true)} /> : null}
+
+        <div className="rail-body">
+          {screen === "agenda" ? <AgendaScreen /> : null}
+          {showFeed ? <ActivityCards variant="stack" /> : null}
+          {adding && draftLocation ? (
+            <AddActivityForm
+              lat={draftLocation.lat}
+              lng={draftLocation.lng}
+              onCancel={cancelAdd}
+              onSave={(input) => addActivity(input)}
+            />
+          ) : null}
+        </div>
+
         {placing ? (
           <div className="placing-banner">
             <div>
-              <strong>Toca el mapa</strong>
-              <span>Marca el punto de la actividad en {city.name}.</span>
+              <strong>Haz clic en el mapa</strong>
+              <span>Elige el punto en {city.name}.</span>
             </div>
             <button className="btn btn-ghost" type="button" onClick={cancelAdd}>
               Salir
             </button>
           </div>
         ) : null}
+
         <BottomDock />
-      </div>
-
-      {screen === "agenda" ? <AgendaScreen /> : null}
-
-      {selected && !adding ? (
-        <ActivitySheet
-          activity={selected}
-          favorited={favorites.includes(selected.id)}
-          onClose={() => selectActivity(null)}
-          onFavorite={() => toggleFavorite(selected.id)}
-          onDelete={selected.source === "user" ? () => removeActivity(selected.id) : undefined}
-        />
-      ) : null}
-
-      {adding && draftLocation ? (
-        <AddActivityForm
-          lat={draftLocation.lat}
-          lng={draftLocation.lng}
-          onCancel={cancelAdd}
-          onSave={(input) => addActivity(input)}
-        />
-      ) : null}
+      </aside>
 
       {cityOpen ? (
         <div className="modal-layer">
@@ -113,6 +118,9 @@ export function Shell() {
           />
         </div>
       ) : null}
+
+      <AuthModal />
     </div>
   );
 }
+

@@ -48,11 +48,16 @@ export function AgendaScreen() {
                 >
                   <div className="event-time">
                     <strong>{formatTime(activity.startsAt)}</strong>
-                    <span style={{ color: cat.color }}>{cat.emoji}</span>
+                    <span className="event-mark" style={{ background: cat.color }}>
+                      {cat.mark}
+                    </span>
                   </div>
                   <div className="event-body">
                     <strong>{activity.title}</strong>
-                    <span>{activity.venue}</span>
+                    <span>
+                      {activity.venue} · {activity.attendees}{" "}
+                      {activity.attendees === 1 ? "persona" : "personas"}
+                    </span>
                   </div>
                 </button>
               );

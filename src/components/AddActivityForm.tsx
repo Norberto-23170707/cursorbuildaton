@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { CATEGORIES } from "../data/categories";
+import { useApp } from "../context/AppContext";
 import { defaultStartValue } from "../lib/format";
 import type { CategoryId } from "../types";
 
@@ -21,11 +22,12 @@ type Props = {
 };
 
 export function AddActivityForm({ lat, lng, onCancel, onSave }: Props) {
+  const { user } = useApp();
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<CategoryId>("musica");
   const [description, setDescription] = useState("");
   const [venue, setVenue] = useState("");
-  const [organizer, setOrganizer] = useState("");
+  const [organizer, setOrganizer] = useState(user?.name ?? "");
   const [startsAt, setStartsAt] = useState(defaultStartValue);
   const [durationMin, setDurationMin] = useState(90);
 
@@ -37,7 +39,7 @@ export function AddActivityForm({ lat, lng, onCancel, onSave }: Props) {
       category,
       description: description.trim() || "Actividad publicada por alguien de la ciudad.",
       venue: venue.trim(),
-      organizer: organizer.trim() || "Vecindario",
+      organizer: organizer.trim() || user?.name || "Vecindario",
       startsAt: new Date(startsAt).toISOString(),
       durationMin,
       lat,
@@ -64,7 +66,7 @@ export function AddActivityForm({ lat, lng, onCancel, onSave }: Props) {
               style={category === item.id ? { background: item.color } : undefined}
               onClick={() => setCategory(item.id)}
             >
-              {item.emoji} {item.short}
+              {item.short}
             </button>
           ))}
         </div>

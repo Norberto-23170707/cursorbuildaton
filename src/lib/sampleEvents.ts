@@ -1,6 +1,6 @@
 import type { Activity, CategoryId } from "../types";
 import { offsetPoint } from "./geo";
-import { addDays, startOfDay, uid } from "./format";
+import { addDays, baseAttendees, startOfDay, uid } from "./format";
 
 type Template = {
   title: string;
@@ -194,6 +194,7 @@ export function generateSampleActivities(cityName: string, cityKey: string, lat:
       organizer: template.organizer,
       source: "seed",
       cityKey,
+      attendees: baseAttendees(template.title, cityKey),
     };
   });
 }

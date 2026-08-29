@@ -11,7 +11,7 @@ type Props = {
   selectedId: string | null;
   adding: boolean;
   draftLocation: { lat: number; lng: number } | null;
-  onSelect: (id: string) => void;
+  onSelect: (id: string | null) => void;
   onPickLocation: (lat: number, lng: number) => void;
 };
 
@@ -37,21 +37,38 @@ function FocusSelected({
   useEffect(() => {
     if (!active) return;
     const point = map.latLngToContainerPoint([lat, lng]);
-    map.panTo(map.containerPointToLatLng([point.x, Math.max(80, point.y - 90)]), { animate: true });
+    map.panTo(map.containerPointToLatLng([point.x, point.y + 80]), { animate: true });
   }, [active, lat, lng, map]);
+  return null;
+}
+
+function InvalidateOnResize() {
+  const map = useMap();
+  useEffect(() => {
+    const resize = () => map.invalidateSize();
+    const timer = window.setTimeout(resize, 80);
+    window.addEventListener("resize", resize);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("resize", resize);
+    };
+  }, [map]);
   return null;
 }
 
 function ClickCatcher({
   enabled,
   onPick,
+  onBackgroundClick,
 }: {
   enabled: boolean;
   onPick: (lat: number, lng: number) => void;
+  onBackgroundClick: () => void;
 }) {
   useMapEvents({
     click(event) {
       if (enabled) onPick(event.latlng.lat, event.latlng.lng);
+      else onBackgroundClick();
     },
   });
   return null;
@@ -63,7 +80,7 @@ function pinIcon(activity: Activity, active: boolean) {
     className: "cerca-pin",
     iconSize: [40, 48],
     iconAnchor: [20, 44],
-    html: `<div class="pin ${active ? "is-active" : ""}"><div class="pin-bubble" style="background:${cat.color}"><span>${cat.emoji}</span></div></div>`,
+    html: `<div class="pin ${active ? "is-active" : ""}"><div class="pin-bubble" style="background:${cat.color}"><span class="pin-mark">${cat.mark}</span></div></div>`,
   });
 }
 
@@ -87,12 +104,13 @@ export function ActivityMap({
   onPickLocation,
 }: Props) {
   return (
-    <MapContainer center={[lat, lng]} zoom={14} zoomControl={false} attributionControl>
+    <MapContainer center={[lat, lng]} zoom={14} zoomControl attributionControl>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <Recenter lat={lat} lng={lng} />
+      <InvalidateOnResize />
       {selectedId
         ? activities
             .filter((activity) => activity.id === selectedId)
@@ -100,7 +118,11 @@ export function ActivityMap({
               <FocusSelected key={activity.id} lat={activity.lat} lng={activity.lng} active />
             ))
         : null}
-      <ClickCatcher enabled={adding} onPick={onPickLocation} />
+      <ClickCatcher
+        enabled={adding}
+        onPick={onPickLocation}
+        onBackgroundClick={() => onSelect(null)}
+      />
       <CircleMarker
         center={[lat, lng]}
         radius={10}

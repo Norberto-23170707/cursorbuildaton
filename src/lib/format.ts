@@ -1,5 +1,5 @@
 import { categoryOf } from "../data/categories";
-import type { Activity } from "../types";
+import type { Activity, WhenFilter } from "../types";
 
 const WEEKDAYS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 const MONTHS = [
@@ -72,12 +72,35 @@ export function isUpcoming(activity: Activity, now = new Date()): boolean {
   return endsAt(activity).getTime() >= now.getTime() - 30 * 60_000;
 }
 
-export function inWhenRange(iso: string, filter: "hoy" | "semana" | "todas", now = new Date()): boolean {
+export function inWhenRange(iso: string, filter: WhenFilter, day: string | null, now = new Date()): boolean {
   if (filter === "todas") return true;
   const date = new Date(iso);
   if (filter === "hoy") return isSameDay(date, now);
+  if (filter === "dia") {
+    const target = day ? parseDateInput(day) : now;
+    return isSameDay(date, target);
+  }
   const end = addDays(startOfDay(now), 7);
   return date >= startOfDay(now) && date < end;
+}
+
+export function toDateInputValue(date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+export function parseDateInput(value: string): Date {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+export function baseAttendees(id: string, title: string): number {
+  let hash = 0;
+  const seed = `${id}:${title}`;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash + seed.charCodeAt(i) * 17) % 37;
+  }
+  return 8 + hash;
 }
 
 export function toDatetimeLocalValue(date: Date): string {
