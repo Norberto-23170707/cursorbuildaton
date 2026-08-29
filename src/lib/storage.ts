@@ -1,9 +1,11 @@
-import type { Activity, City } from "../types";
+import type { Activity, City, User } from "../types";
 
 const CITY_KEY = "cerca.city";
 const ACTIVITIES_KEY = "cerca.activities";
 const FAVORITES_KEY = "cerca.favorites";
 const ONBOARDED_KEY = "cerca.onboarded";
+const USER_KEY = "cerca.user";
+const JOINED_KEY = "cerca.joined";
 
 function read<T>(key: string, fallback: T): T {
   try {
@@ -28,4 +30,8 @@ export const storage = {
   setFavorites: (ids: string[]) => write(FAVORITES_KEY, ids),
   getOnboarded: () => read<boolean>(ONBOARDED_KEY, false),
   setOnboarded: (value: boolean) => write(ONBOARDED_KEY, value),
+  getUser: () => read<User | null>(USER_KEY, null),
+  setUser: (user: User | null) => write(USER_KEY, user),
+  getJoined: () => read<string[]>(JOINED_KEY, []),
+  setJoined: (ids: string[]) => write(JOINED_KEY, ids),
 };

@@ -22,7 +22,7 @@ export function ActivitySheet({ activity, favorited, onClose, onFavorite, onDele
         <div className="sheet-head">
           <div>
             <div className="kicker" style={{ color: cat.color }}>
-              {cat.emoji} {cat.label}
+              {cat.label}
               {activity.source === "user" ? " · Publicada por ti" : ""}
             </div>
             <h2 id="activity-title">{activity.title}</h2>

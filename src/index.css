@@ -140,9 +140,13 @@ img {
   border: 2px solid #fff8ee;
 }
 
-.pin-bubble span {
+.pin-bubble span,
+.pin-mark {
   transform: rotate(45deg);
-  font-size: 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff8ee;
   line-height: 1;
 }
 
@@ -517,6 +521,106 @@ img {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 700;
+}
+
+.text-btn {
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0;
+}
+
+.day-field {
+  display: inline-flex;
+  align-items: center;
+}
+
+.day-field input[type="date"] {
+  border: 0;
+  background: #efe4d2;
+  border-radius: 999px;
+  padding: 6px 10px;
+  min-height: 36px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.event-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #fff8ee;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.is-island .preview-row {
+  display: none;
+}
+
+.map-island {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--tabbar-h) + 10px);
+  z-index: 10;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 14px 16px 16px;
+  box-shadow: var(--shadow);
+}
+
+.island-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.island-handle {
+  width: 42px;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(20, 32, 27, 0.18);
+  margin: 0 auto 10px;
+}
+
+.map-island h2 {
+  font-family: var(--display);
+  font-size: 22px;
+  margin: 4px 0 8px;
+  line-height: 1.15;
+}
+
+.map-island p {
+  margin: 0 0 10px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+.island-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.island-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.auth-card .field {
+  margin-top: 10px;
 }
 
 .icon-btn {
@@ -991,6 +1095,8 @@ label.field {
   .rail {
     position: relative;
     inset: auto;
+    display: flex;
+    flex-direction: column;
     grid-column: 1;
     grid-row: 1;
     pointer-events: auto;
@@ -1077,10 +1183,27 @@ label.field {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    overflow: auto;
+    overflow-y: scroll;
     padding: 4px 0 12px;
     flex: 1;
     min-height: 0;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: var(--forest) #eadcc8;
+  }
+
+  .feed-stack::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .feed-stack::-webkit-scrollbar-thumb {
+    background: var(--forest);
+    border-radius: 99px;
+  }
+
+  .feed-stack::-webkit-scrollbar-track {
+    background: #eadcc8;
+    border-radius: 99px;
   }
 
   .feed-stack .preview-card {
@@ -1199,7 +1322,11 @@ label.field {
     width: auto;
     border: 0;
     box-shadow: none;
-    padding: 16px 16px 88px;
+    padding: 16px 16px 24px;
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: var(--forest) #eadcc8;
   }
 
   .leaflet-control-zoom {
@@ -1212,6 +1339,18 @@ label.field {
   .leaflet-bottom.leaflet-right {
     bottom: 10px;
     right: 8px;
+  }
+
+  .is-island .leaflet-bottom.leaflet-right {
+    bottom: 168px;
+  }
+
+  .map-island {
+    left: 50%;
+    right: auto;
+    bottom: 22px;
+    width: min(520px, calc(100% - 48px));
+    transform: translateX(-50%);
   }
 
   .onboard {

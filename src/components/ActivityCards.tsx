@@ -24,11 +24,11 @@ export function ActivityCards({ variant }: Props) {
             className={`preview-card ${selectedId === activity.id ? "is-selected" : ""}`}
             onClick={() => selectActivity(activity.id)}
           >
-            <small style={{ color: cat.color }}>
-              {cat.emoji} {formatChipDate(activity.startsAt)}
-            </small>
+            <small style={{ color: cat.color }}>{formatChipDate(activity.startsAt)}</small>
             <strong>{activity.title}</strong>
-            <span>{activity.venue}</span>
+            <span>
+              {activity.venue} · {activity.attendees} {activity.attendees === 1 ? "persona" : "personas"}
+            </span>
           </button>
         );
       })}

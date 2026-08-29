@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import { ActivityCards } from "./ActivityCards";
 import { ActivityMap } from "./ActivityMap";
-import { ActivitySheet } from "./ActivitySheet";
 import { AddActivityForm } from "./AddActivityForm";
 import { AgendaScreen } from "./AgendaScreen";
+import { AuthModal } from "./AuthModal";
 import { BottomDock } from "./BottomDock";
 import { CityPicker } from "./CityPicker";
 import { MapHud } from "./MapHud";
+import { MapIsland } from "./MapIsland";
 import { Onboarding } from "./Onboarding";
 
 export function Shell() {
@@ -23,9 +24,6 @@ export function Shell() {
     selectActivity,
     addActivity,
     cancelAdd,
-    removeActivity,
-    toggleFavorite,
-    favorites,
     changeCity,
   } = useApp();
   const [cityOpen, setCityOpen] = useState(false);
@@ -38,13 +36,14 @@ export function Shell() {
     );
   }
 
-  const sheetOpen = Boolean((selected && !adding) || (adding && draftLocation));
+  const formOpen = Boolean(adding && draftLocation);
   const placing = adding && !draftLocation;
-  const showFeed = screen === "map" && !sheetOpen && !placing;
+  const showFeed = screen === "map" && !formOpen && !placing;
   const rootClass = [
     "app-root",
-    sheetOpen ? "is-sheet" : "",
+    formOpen ? "is-sheet" : "",
     placing ? "is-placing" : "",
+    selected && !adding ? "is-island" : "",
     screen === "agenda" ? "is-agenda" : "",
   ]
     .filter(Boolean)
@@ -72,6 +71,7 @@ export function Shell() {
             </button>
           </div>
         ) : null}
+        {selected && !adding ? <MapIsland /> : null}
       </div>
 
       <aside className="rail">
@@ -80,15 +80,6 @@ export function Shell() {
         <div className="rail-body">
           {screen === "agenda" ? <AgendaScreen /> : null}
           {showFeed ? <ActivityCards variant="stack" /> : null}
-          {selected && !adding ? (
-            <ActivitySheet
-              activity={selected}
-              favorited={favorites.includes(selected.id)}
-              onClose={() => selectActivity(null)}
-              onFavorite={() => toggleFavorite(selected.id)}
-              onDelete={selected.source === "user" ? () => removeActivity(selected.id) : undefined}
-            />
-          ) : null}
           {adding && draftLocation ? (
             <AddActivityForm
               lat={draftLocation.lat}
@@ -127,6 +118,8 @@ export function Shell() {
           />
         </div>
       ) : null}
+
+      <AuthModal />
     </div>
   );
 }
