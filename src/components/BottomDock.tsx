@@ -24,29 +24,31 @@ export function BottomDock() {
                   {cat.emoji} {formatChipDate(activity.startsAt)}
                 </small>
                 <strong>{activity.title}</strong>
-                <span style={{ color: "#3d4a43", fontSize: 13 }}>{activity.venue}</span>
+                <span>{activity.venue}</span>
               </button>
             );
           })}
         </div>
       ) : null}
-      <nav className="nav-pill">
+      <nav className="tabbar">
         <button
           type="button"
           className={`nav-btn ${screen === "map" ? "is-on" : ""}`}
           onClick={() => setScreen("map")}
         >
-          <MapIcon size={16} /> Mapa
+          <MapIcon size={18} />
+          Mapa
+        </button>
+        <button type="button" className="fab" onClick={startAdd} aria-label="Publicar actividad">
+          <Plus size={26} />
         </button>
         <button
           type="button"
           className={`nav-btn ${screen === "agenda" ? "is-on" : ""}`}
           onClick={() => setScreen("agenda")}
         >
-          <CalendarDays size={16} /> Agenda
-        </button>
-        <button type="button" className="add-btn" onClick={startAdd} aria-label="Publicar actividad">
-          <Plus size={22} />
+          <CalendarDays size={18} />
+          Agenda
         </button>
       </nav>
     </div>

@@ -1,4 +1,4 @@
-import { CalendarDays, Clock, Heart, MapPinned, Trash2, UserRound } from "lucide-react";
+import { CalendarDays, Clock, Heart, MapPinned, Trash2, UserRound, X } from "lucide-react";
 import { categoryOf } from "../data/categories";
 import { formatDayLabel, formatDuration, formatTime } from "../lib/format";
 import { mapsLink } from "../lib/geo";
@@ -27,9 +27,14 @@ export function ActivitySheet({ activity, favorited, onClose, onFavorite, onDele
             </div>
             <h2 id="activity-title">{activity.title}</h2>
           </div>
-          <button className="icon-btn" onClick={onFavorite} aria-label="Guardar" type="button">
-            <Heart size={18} fill={favorited ? "#c45c26" : "none"} color={favorited ? "#c45c26" : "currentColor"} />
-          </button>
+          <div className="sheet-tools">
+            <button className="icon-btn" onClick={onFavorite} aria-label="Guardar" type="button">
+              <Heart size={18} fill={favorited ? "#c45c26" : "none"} color={favorited ? "#c45c26" : "currentColor"} />
+            </button>
+            <button className="icon-btn" onClick={onClose} aria-label="Cerrar" type="button">
+              <X size={18} />
+            </button>
+          </div>
         </div>
         <div className="meta-row">
           <span className="meta">
@@ -46,12 +51,12 @@ export function ActivitySheet({ activity, favorited, onClose, onFavorite, onDele
           </span>
         </div>
         <p>{activity.description}</p>
-        <div className="actions">
+        <div className="actions sheet-actions">
           <a className="btn btn-primary grow" href={mapsLink(activity.lat, activity.lng, activity.venue)} target="_blank" rel="noreferrer">
             Cómo llegar
           </a>
           {onDelete ? (
-            <button className="btn btn-danger" type="button" onClick={onDelete}>
+            <button className="btn btn-danger" type="button" onClick={onDelete} aria-label="Borrar actividad">
               <Trash2 size={16} />
             </button>
           ) : null}

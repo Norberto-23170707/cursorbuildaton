@@ -24,6 +24,24 @@ function Recenter({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
+function FocusSelected({
+  lat,
+  lng,
+  active,
+}: {
+  lat: number;
+  lng: number;
+  active: boolean;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    if (!active) return;
+    const point = map.latLngToContainerPoint([lat, lng]);
+    map.panTo(map.containerPointToLatLng([point.x, Math.max(80, point.y - 90)]), { animate: true });
+  }, [active, lat, lng, map]);
+  return null;
+}
+
 function ClickCatcher({
   enabled,
   onPick,
@@ -43,8 +61,8 @@ function pinIcon(activity: Activity, active: boolean) {
   const cat = categoryOf(activity.category);
   return L.divIcon({
     className: "cerca-pin",
-    iconSize: [34, 42],
-    iconAnchor: [17, 40],
+    iconSize: [40, 48],
+    iconAnchor: [20, 44],
     html: `<div class="pin ${active ? "is-active" : ""}"><div class="pin-bubble" style="background:${cat.color}"><span>${cat.emoji}</span></div></div>`,
   });
 }
@@ -52,8 +70,8 @@ function pinIcon(activity: Activity, active: boolean) {
 function draftIcon() {
   return L.divIcon({
     className: "cerca-pin",
-    iconSize: [34, 42],
-    iconAnchor: [17, 40],
+    iconSize: [40, 48],
+    iconAnchor: [20, 44],
     html: `<div class="pin is-draft"><div class="pin-bubble"><span>+</span></div></div>`,
   });
 }
@@ -75,6 +93,13 @@ export function ActivityMap({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <Recenter lat={lat} lng={lng} />
+      {selectedId
+        ? activities
+            .filter((activity) => activity.id === selectedId)
+            .map((activity) => (
+              <FocusSelected key={activity.id} lat={activity.lat} lng={activity.lng} active />
+            ))
+        : null}
       <ClickCatcher enabled={adding} onPick={onPickLocation} />
       <CircleMarker
         center={[lat, lng]}
