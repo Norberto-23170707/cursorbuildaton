@@ -990,6 +990,8 @@ label.field {
     grid-row: 1;
     pointer-events: auto;
     height: 100%;
+    min-height: 0;
+    overflow: hidden;
     background: var(--paper);
     border-right: 1px solid rgba(20, 32, 27, 0.16);
     box-shadow: none;
@@ -1001,6 +1003,8 @@ label.field {
     display: flex;
     flex-direction: column;
     padding: 0 14px;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .rail-brand {
@@ -1072,6 +1076,7 @@ label.field {
     overflow: auto;
     padding: 4px 0 12px;
     flex: 1;
+    min-height: 0;
   }
 
   .feed-stack .preview-card {
@@ -1097,6 +1102,9 @@ label.field {
     left: auto;
     right: auto;
     bottom: auto;
+    flex: none;
+    z-index: 3;
+    background: var(--paper);
   }
 
   .bottom-dock .preview-row {
