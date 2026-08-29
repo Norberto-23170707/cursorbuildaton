@@ -802,6 +802,13 @@ label.field {
   font-size: 16px;
   color: var(--ink);
   min-height: 48px;
+  caret-color: var(--ink);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.65;
 }
 
 .field textarea {
@@ -1035,9 +1042,9 @@ label.field {
 }
 
 .modal-layer {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 30;
+  z-index: 50;
   background: rgba(20, 32, 27, 0.45);
   display: grid;
   align-items: end;
@@ -1359,6 +1366,8 @@ label.field {
   }
 
   .modal-layer {
+    grid-column: 1 / -1;
+    grid-row: 1;
     padding: 24px;
     align-items: center;
     justify-content: center;

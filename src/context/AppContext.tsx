@@ -180,6 +180,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const startAdd = useCallback(() => {
     if (!storage.getUser()) {
+      setSelectedId(null);
       setAuthIntent("publish");
       setAuthOpen(true);
       return;
