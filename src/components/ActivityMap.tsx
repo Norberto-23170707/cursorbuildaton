@@ -71,8 +71,8 @@ export function ActivityMap({
   return (
     <MapContainer center={[lat, lng]} zoom={14} zoomControl={false} attributionControl>
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · CARTO'
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <Recenter lat={lat} lng={lng} />
       <ClickCatcher enabled={adding} onPick={onPickLocation} />
