@@ -36,9 +36,24 @@ function FocusSelected({
   const map = useMap();
   useEffect(() => {
     if (!active) return;
+    if (window.matchMedia("(min-width: 900px)").matches) return;
     const point = map.latLngToContainerPoint([lat, lng]);
     map.panTo(map.containerPointToLatLng([point.x, Math.max(80, point.y - 90)]), { animate: true });
   }, [active, lat, lng, map]);
+  return null;
+}
+
+function InvalidateOnResize() {
+  const map = useMap();
+  useEffect(() => {
+    const resize = () => map.invalidateSize();
+    const timer = window.setTimeout(resize, 80);
+    window.addEventListener("resize", resize);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("resize", resize);
+    };
+  }, [map]);
   return null;
 }
 
@@ -87,12 +102,13 @@ export function ActivityMap({
   onPickLocation,
 }: Props) {
   return (
-    <MapContainer center={[lat, lng]} zoom={14} zoomControl={false} attributionControl>
+    <MapContainer center={[lat, lng]} zoom={14} zoomControl attributionControl>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <Recenter lat={lat} lng={lng} />
+      <InvalidateOnResize />
       {selectedId
         ? activities
             .filter((activity) => activity.id === selectedId)

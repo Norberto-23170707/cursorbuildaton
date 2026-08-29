@@ -11,6 +11,7 @@
   --shadow: 0 12px 32px rgba(20, 32, 27, 0.16);
   --font: "Figtree", system-ui, sans-serif;
   --display: "Fraunces", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --tabbar-h: calc(62px + var(--safe-bottom));
@@ -104,9 +105,16 @@ img {
   bottom: 8px;
 }
 
-.leaflet-top,
-.leaflet-bottom {
-  z-index: 4;
+.leaflet-control-zoom {
+  display: none;
+}
+
+.preview-card.is-selected {
+  box-shadow: inset 0 0 0 2px var(--forest);
+}
+
+.is-sheet .top-stack {
+  display: none;
 }
 
 .cerca-pin {
@@ -147,22 +155,41 @@ img {
   animation: pulse 1.4s ease infinite;
 }
 
-@keyframes pulse {
-  50% {
-    transform: rotate(-45deg) scale(1.06);
+@media (prefers-reduced-motion: reduce) {
+  .pin.is-draft .pin-bubble {
+    animation: none;
   }
 }
 
-/* HUD */
-.hud {
+/* Chrome overlay */
+.rail {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 20;
+  display: flex;
+  flex-direction: column;
 }
 
-.hud > * {
+.rail > * {
   pointer-events: auto;
+}
+
+.rail-body {
+  flex: 1;
+  min-height: 0;
+  pointer-events: none;
+  position: relative;
+}
+
+.rail-body > * {
+  pointer-events: auto;
+}
+
+.rail-brand,
+.feed-stack,
+.map-toast {
+  display: none;
 }
 
 .top-stack {
@@ -932,65 +959,247 @@ label.field {
 }
 
 @media (min-width: 900px) {
+  :root {
+    --rail-w: min(400px, 34vw);
+  }
+
   #root {
-    background:
-      radial-gradient(1200px 600px at 10% -10%, #33584a 0%, transparent 50%),
-      radial-gradient(900px 500px at 100% 100%, #3b2a1c 0%, transparent 45%),
-      var(--forest);
+    background: var(--forest);
   }
 
   .app-root {
-    width: min(100%, 1280px);
-    margin: 18px;
-    height: calc(100dvh - 36px);
-    border-radius: 28px;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
+    display: grid;
+    grid-template-columns: var(--rail-w) 1fr;
+    width: 100%;
+    height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
-  .sheet,
-  .modal-layer .panel,
-  .onboard-card {
-    max-width: 420px;
+  .screen {
+    position: relative;
+    grid-column: 2;
+    grid-row: 1;
+    z-index: 1;
   }
 
-  .sheet {
-    left: 18px;
-    right: auto;
-    bottom: 18px;
-    width: 400px;
-    border-radius: 28px;
+  .rail {
+    position: relative;
+    grid-column: 1;
+    grid-row: 1;
+    pointer-events: auto;
+    height: 100%;
+    background: var(--paper);
+    border-right: 1px solid rgba(20, 32, 27, 0.16);
+    box-shadow: none;
+    z-index: 20;
+  }
+
+  .rail-body {
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 0 14px;
+  }
+
+  .rail-brand {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 4px 2px 2px;
+  }
+
+  .rail-brand .brand {
+    color: var(--clay);
+  }
+
+  .rail-brand-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-soft);
   }
 
   .top-stack {
+    position: static;
+    width: auto;
+    left: auto;
     right: auto;
-    width: 420px;
+    top: auto;
+    padding: 16px 14px 10px;
+    gap: 10px;
+  }
+
+  .is-sheet .top-stack {
+    display: grid;
+  }
+
+  .search-hero {
+    display: grid;
+    grid-template-columns: 1fr;
+    border-radius: 16px;
+    box-shadow: none;
+  }
+
+  .city-mini {
+    max-width: none;
+    padding: 12px;
+  }
+
+  .city-mini-text strong {
+    font-size: 16px;
+  }
+
+  .search-inline {
+    border-top: 1px solid var(--line);
+    min-height: 48px;
+  }
+
+  .chip-row {
+    flex-wrap: wrap;
+    overflow: visible;
+    box-shadow: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+  }
+
+  .feed-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: auto;
+    padding: 4px 0 12px;
+    flex: 1;
+  }
+
+  .feed-stack .preview-card {
+    width: 100%;
+    min-width: 0;
+    scroll-snap-align: unset;
+    box-shadow: none;
+  }
+
+  .feed-stack .preview-card strong {
+    font-size: 18px;
+    white-space: normal;
+  }
+
+  .feed-stack .preview-card small {
+    font-family: var(--mono);
+    font-size: 11px;
   }
 
   .bottom-dock {
-    left: 18px;
+    position: static;
+    width: auto;
+    left: auto;
     right: auto;
-    width: 420px;
-    bottom: 12px;
+    bottom: auto;
+  }
+
+  .bottom-dock .preview-row {
+    display: none;
   }
 
   .tabbar {
-    border: 1px solid var(--line);
-    border-radius: 24px;
-    box-shadow: var(--shadow);
-    padding-bottom: 8px;
-    min-height: 64px;
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+    box-shadow: none;
+    padding: 8px 10px 12px;
+    min-height: 72px;
+    background: var(--paper-2);
   }
 
-  .leaflet-bottom.leaflet-right {
-    bottom: 18px;
+  .is-sheet .bottom-dock,
+  .is-placing .bottom-dock {
+    display: grid;
+  }
+
+  .is-placing .tabbar {
+    display: grid;
+  }
+
+  .placing-banner {
+    display: none;
+  }
+
+  .map-toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    z-index: 8;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+  }
+
+  .map-toast strong {
+    display: block;
+    font-size: 14px;
+  }
+
+  .map-toast span {
+    color: var(--ink-soft);
+    font-size: 13px;
+    margin-right: auto;
+  }
+
+  .sheet-backdrop {
+    display: none;
+  }
+
+  .sheet {
+    position: absolute;
+    inset: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
+    padding: 8px 2px 16px;
+    background: transparent;
+  }
+
+  .sheet-handle {
+    display: none;
+  }
+
+  .sheet-actions {
+    position: static;
   }
 
   .agenda {
-    left: auto;
-    width: min(440px, 100%);
-    border-left: 1px solid var(--line);
+    position: absolute;
+    inset: 0;
+    width: auto;
+    border: 0;
+    box-shadow: none;
+    padding: 16px 16px 88px;
+  }
+
+  .leaflet-control-zoom {
+    display: block;
+    margin: 16px 16px 0 0 !important;
+    border: 0 !important;
     box-shadow: var(--shadow);
-    padding-bottom: 88px;
+  }
+
+  .leaflet-bottom.leaflet-right {
+    bottom: 10px;
+    right: 8px;
   }
 
   .onboard {
@@ -999,16 +1208,18 @@ label.field {
   }
 
   .modal-layer {
-    padding: 12px;
-    align-items: end;
-    justify-content: start;
+    padding: 24px;
+    align-items: center;
+    justify-content: center;
   }
 
-  .modal-layer .panel {
+  .modal-layer .panel,
+  .onboard-card {
+    max-width: 440px;
     border-radius: 28px;
   }
 
-  .is-sheet .bottom-dock {
-    display: grid;
+  .event-time strong {
+    font-family: var(--mono);
   }
 }

@@ -19,6 +19,12 @@ export function MapHud({ onChangeCity }: Props) {
 
   return (
     <div className="top-stack">
+      <div className="rail-brand">
+        <span className="brand">Cerca</span>
+        <span className="rail-brand-meta">
+          {visibleActivities.length} {visibleActivities.length === 1 ? "plan" : "planes"} en el mapa
+        </span>
+      </div>
       <div className="search-hero">
         <button className="city-mini" type="button" onClick={onChangeCity}>
           <span className="city-mark" aria-hidden>
@@ -26,9 +32,7 @@ export function MapHud({ onChangeCity }: Props) {
           </span>
           <span className="city-mini-text">
             <strong>{city.name}</strong>
-            <em>
-              {visibleActivities.length} {visibleActivities.length === 1 ? "plan" : "planes"}
-            </em>
+            <em>{city.country || "Tu localidad"}</em>
           </span>
         </button>
         <label className="search-inline">
