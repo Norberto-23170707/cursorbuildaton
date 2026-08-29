@@ -990,11 +990,7 @@ label.field {
     width: min(440px, 100%);
     border-left: 1px solid var(--line);
     box-shadow: var(--shadow);
-    padding-bottom: 24px;
-  }
-
-  .is-agenda .bottom-dock {
-    display: none;
+    padding-bottom: 88px;
   }
 
   .onboard {
