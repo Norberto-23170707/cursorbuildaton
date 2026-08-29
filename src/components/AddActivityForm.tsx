@@ -46,12 +46,10 @@ export function AddActivityForm({ lat, lng, onCancel, onSave }: Props) {
   }
 
   return (
-    <aside className="sheet" role="dialog" aria-labelledby="add-title">
+    <aside className="sheet sheet-form" role="dialog" aria-labelledby="add-title">
       <div className="sheet-handle" />
       <div className="kicker">Nueva actividad</div>
-      <h2 id="add-title" style={{ fontSize: 26, marginBottom: 12 }}>
-        Cuéntanos qué se arma
-      </h2>
+      <h2 id="add-title">Cuéntanos qué se arma</h2>
       <form className="form-grid" onSubmit={submit}>
         <label className="field">
           Título
@@ -66,7 +64,7 @@ export function AddActivityForm({ lat, lng, onCancel, onSave }: Props) {
               style={category === item.id ? { background: item.color } : undefined}
               onClick={() => setCategory(item.id)}
             >
-              {item.emoji} {item.label}
+              {item.emoji} {item.short}
             </button>
           ))}
         </div>
@@ -74,20 +72,22 @@ export function AddActivityForm({ lat, lng, onCancel, onSave }: Props) {
           Lugar
           <input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Parque, foro, café…" required />
         </label>
-        <label className="field">
-          Cuándo
-          <input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} required />
-        </label>
-        <label className="field">
-          Duración
-          <select value={durationMin} onChange={(e) => setDurationMin(Number(e.target.value))}>
-            <option value={45}>45 min</option>
-            <option value={60}>1 h</option>
-            <option value={90}>1 h 30</option>
-            <option value={120}>2 h</option>
-            <option value={180}>3 h</option>
-          </select>
-        </label>
+        <div className="field-row">
+          <label className="field">
+            Cuándo
+            <input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} required />
+          </label>
+          <label className="field">
+            Duración
+            <select value={durationMin} onChange={(e) => setDurationMin(Number(e.target.value))}>
+              <option value={45}>45 min</option>
+              <option value={60}>1 h</option>
+              <option value={90}>1 h 30</option>
+              <option value={120}>2 h</option>
+              <option value={180}>3 h</option>
+            </select>
+          </label>
+        </div>
         <label className="field">
           Quién organiza
           <input value={organizer} onChange={(e) => setOrganizer(e.target.value)} placeholder="Colectivo, banda, vecinos…" />
@@ -96,12 +96,12 @@ export function AddActivityForm({ lat, lng, onCancel, onSave }: Props) {
           Qué va a pasar
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Cuéntale a la ciudad por qué vale la pena ir." />
         </label>
-        <div className="actions">
+        <div className="actions sheet-actions">
           <button className="btn btn-ghost" type="button" onClick={onCancel}>
             Cancelar
           </button>
           <button className="btn btn-primary grow" type="submit">
-            Publicar en el mapa
+            Publicar
           </button>
         </div>
       </form>

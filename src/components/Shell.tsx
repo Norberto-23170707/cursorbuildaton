@@ -37,8 +37,19 @@ export function Shell() {
     );
   }
 
+  const sheetOpen = Boolean((selected && !adding) || (adding && draftLocation));
+  const placing = adding && !draftLocation;
+  const rootClass = [
+    "app-root",
+    sheetOpen ? "is-sheet" : "",
+    placing ? "is-placing" : "",
+    screen === "agenda" ? "is-agenda" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div className="app-root">
+    <div className={rootClass}>
       <div className="screen">
         <ActivityMap
           lat={city.lat}
@@ -53,18 +64,16 @@ export function Shell() {
       </div>
 
       <div className="hud">
-        {screen === "map" ? <MapHud onChangeCity={() => setCityOpen(true)} /> : null}
-        {adding && !draftLocation ? (
-          <div className="bottom-dock" style={{ bottom: 86 }}>
-            <div className="banner">
-              <div>
-                <strong>Toca el mapa</strong>
-                <span>Elige el punto exacto de la actividad en {city.name}.</span>
-              </div>
-              <button className="btn btn-ghost" type="button" onClick={cancelAdd}>
-                Salir
-              </button>
+        {screen === "map" && !sheetOpen ? <MapHud onChangeCity={() => setCityOpen(true)} /> : null}
+        {placing ? (
+          <div className="placing-banner">
+            <div>
+              <strong>Toca el mapa</strong>
+              <span>Marca el punto de la actividad en {city.name}.</span>
             </div>
+            <button className="btn btn-ghost" type="button" onClick={cancelAdd}>
+              Salir
+            </button>
           </div>
         ) : null}
         <BottomDock />

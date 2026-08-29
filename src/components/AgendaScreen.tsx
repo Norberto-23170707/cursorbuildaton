@@ -13,15 +13,15 @@ export function AgendaScreen() {
     <section className="agenda">
       <header className="agenda-head">
         <h1>Agenda</h1>
-        <p>Lo que se arma en {city?.name ?? "tu ciudad"}, en orden de llegada.</p>
-        <label className="search-card" style={{ marginBottom: 12 }}>
+        <p>Lo que se arma en {city?.name ?? "tu ciudad"}.</p>
+        <label className="search-card">
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Filtrar agenda" />
         </label>
-        <div className="when-row" style={{ marginBottom: 16 }}>
-          <button type="button" className={`when-chip ${!onlySaved ? "is-on" : ""}`} onClick={() => setOnlySaved(false)}>
+        <div className="segment">
+          <button type="button" className={`segment-btn ${!onlySaved ? "is-on" : ""}`} onClick={() => setOnlySaved(false)}>
             Próximas
           </button>
-          <button type="button" className={`when-chip ${onlySaved ? "is-on" : ""}`} onClick={() => setOnlySaved(true)}>
+          <button type="button" className={`segment-btn ${onlySaved ? "is-on" : ""}`} onClick={() => setOnlySaved(true)}>
             Guardadas
           </button>
         </div>
@@ -46,13 +46,14 @@ export function AgendaScreen() {
                     setScreen("map");
                   }}
                 >
-                  <div className="time">
-                    {formatTime(activity.startsAt)} · {cat.label}
+                  <div className="event-time">
+                    <strong>{formatTime(activity.startsAt)}</strong>
+                    <span style={{ color: cat.color }}>{cat.emoji}</span>
                   </div>
-                  <strong style={{ display: "block", fontFamily: "var(--display)", fontSize: 20, margin: "4px 0" }}>
-                    {activity.title}
-                  </strong>
-                  <span style={{ color: "#3d4a43" }}>{activity.venue}</span>
+                  <div className="event-body">
+                    <strong>{activity.title}</strong>
+                    <span>{activity.venue}</span>
+                  </div>
                 </button>
               );
             })}
